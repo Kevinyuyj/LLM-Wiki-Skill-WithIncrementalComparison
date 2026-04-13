@@ -1,38 +1,63 @@
 # CHANGELOG
 
-All notable changes to this skill will be documented in this file.
+All notable changes to this skill are documented here.
 
-## [1.0.0] — 2026-04-13
+## [2.1.0] — 2026-04-13
 
 ### Added
 
-- **Incremental ingest workflow** with SHA256 content hash comparison
-- **Manifest-based state tracking** (`.ingest_manifest.json`)
-- **Copilot conversation archival** with "painful to re-derive" threshold
-- **Complete ingest pipeline**: scan → hash compare → process → update wiki → report
-- **Edge case handling**: file deletion, path changes, identical-content moves
-- **Full documentation**: README, LICENSE, CHANGELOG, CONTRIBUTING
+- **SHA256 content-hash manifest** (`.ingest_manifest.json`) — THE core innovation
+  - Each file tracked by its SHA256 hash, not path
+  - Persists across sessions for true incremental processing
+- **3-way incremental comparison** — new / modified / unchanged / deleted
+- **copilot-conversations/ pipeline** — full ingest flow for Q&A archival
+  - "Painful to re-derive" threshold: only archive valuable insights
+  - Skips: formatting fixes, redundant content, already-covered topics
+- **Automated wiki maintenance** — index.md, log.md, manifest all auto-updated after ingest
+- **Edge case handling**:
+  - File deletion → manifest cleanup
+  - Path change → hash detected, no duplicates
+  - Same content moved → hash identical, skip
 
-### Features
+### Documentation
 
-- Processes only new or modified files — skips unchanged ones
-- Updates `entities/`, `concepts/`, `comparisons/`, `queries/` based on LLM-WIKI schema
-- Auto-updates `index.md` and `log.md` after every ingest
-- Manifest tracks: `content_hash`, `mtime`, `size`, `processed_at`
+- README with clear "original vs ours" comparison table
+- SKILL.md with detailed step-by-step + our modifications highlighted
+- Version history showing evolution (1.0 → 2.0 → 2.1)
 
-### Skill Structure
+### Verified Scenarios
 
-```
-knowledge-ingest/
-├── SKILL.md       — Main skill definition (Hermes Agent format)
-├── README.md      — Overview and usage
-├── LICENSE        — MIT License
-├── CHANGELOG.md   — Version history
-└── CONTRIBUTING.md — Guidelines
-```
+| Test | Scenario | Result |
+|------|----------|--------|
+| 1 | First ingest (empty manifest) | ✅ All files processed, manifest created |
+| 2 | Second ingest (no changes) | ✅ All skipped, zero LLM calls |
+| 3 | Third ingest (1 new + 1 modified) | ✅ Only 2 processed, 10 skipped |
 
-## [Unreleased]
+## [2.0.0] — 2026-04-13
 
-- Support for PDF and PPTX ingest via MarkItDown integration
-- Git-based change detection as alternative to hash
-- Batch processing for large `raw/` directories
+### Changed
+
+- **Major restructure**: Abandoned self-invented `knowledge/notes/diary/` directories
+- Aligned with LLM-WIKI original: `entities/`, `concepts/`, `comparisons/`, `queries/`
+- Derived notes now go to LLM-WIKI-defined directories only
+
+### Fixed
+
+- `raw/` is sacred — never modified/moved/deleted
+- Copilot conversations: read and analyze, never move original files
+
+## [1.0.0] — 2026-04-12
+
+### Added
+
+- Initial knowledge-ingest skill
+- Ingest workflow: raw → derived notes
+- `knowledge/`, `notes/`, `diary/` directory structure (later abandoned)
+
+---
+
+## Versioning Philosophy
+
+- **2.x.y**: Incremental system additions or improvements
+- **x.0.0**: Directory structure or workflow paradigm changes
+- **x.y.0**: New features or significant rewrites

@@ -1,7 +1,7 @@
 ---
 name: knowledge-ingest
 description: Incremental knowledge base ingest workflow — SHA256 content-hash based, only processes new/changed files
-version: 2.1.0
+version: 2.2.0
 author: Kevinyuyj
 license: MIT
 github: https://github.com/Kevinyuyj/LLM-Wiki-Skill-WithIncrementalComparison
@@ -280,6 +280,7 @@ ingest 完成后确认：
 
 | 版本 | 日期 | 改动 |
 |------|------|------|
+| 2.2.0 | 2026-04-13 | raw/ 只接受 .md 文件，其他格式全部跳过 |
 | 2.1.0 | 2026-04-13 | 增量 manifest 系统、copilot 对话处理流程、自动化 wiki 收尾 |
 | 2.0.0 | 2026-04-13 | 重大修正：统一 LLM-WIKI 目录结构（entities/concepts/comparisons/queries） |
 | 1.0.0 | 2026-04-12 | 初始版本（自创 knowledge/notes/diary 目录，后废弃） |

@@ -2,6 +2,12 @@
 
 All notable changes to this skill are documented here.
 
+## [2.2.0] — 2026-04-13
+
+### Changed
+
+- **raw/ accepts .md only** — only `.md` files are processed during ingest; all other formats (PDF, DOCX, PPTX, XLSX, ZIP, MP4, etc.) are silently skipped. Convert source documents to `.md` before ingest if needed.
+
 ## [2.1.0] — 2026-04-13
 
 ### Added

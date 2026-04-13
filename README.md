@@ -3,7 +3,7 @@
 > Hash-based incremental ingest for personal knowledge bases. Only processes new and modified files — skips everything else.
 
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.1.0-blue.svg)](SKILL.md)
+[![Version](https://img.shields.io/badge/Version-2.2.0-blue.svg)](SKILL.md)
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: knowledge-ingest
-description: Kevin 知识库 ingest 工作流 — 增量版，基于 SHA256 content-hash 对比，只处理新增/变化的文件
+description: Incremental knowledge base ingest workflow — SHA256 content-hash based, only processes new/changed files
 version: 2.1.0
 author: Kevinyuyj
 license: MIT
@@ -130,7 +130,7 @@ b) manifest 结构：{文件路径: {content_hash, mtime, size, processed_at}}
 
 ```
 a) 遍历 raw/ 及其所有子目录，收集所有文件
-b) 过滤：跳过 .DS_Store 等系统文件
+b) 过滤：只保留 .md 文件，跳过所有其他格式（.pdf/.docx/.pptx/.xlsx/.zip/.mp4 等）；跳过 .DS_Store 等系统文件
 c) 对每个文件计算：
    - content_hash = SHA256(文件内容)
    - mtime = 文件修改时间

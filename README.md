@@ -86,7 +86,7 @@ If you move `raw/article.md` to `raw/diarys/article.md`, the hash is identical �
 ## Usage
 
 ```
-Kevin: "ingest"
+You: "ingest"
 
 → Agent scans raw/ and copilot-conversations/
 → Computes SHA256 for each file
@@ -102,6 +102,8 @@ No configuration needed. Just say "ingest".
 ---
 
 ## What We Added (vs Original LLM-WIKI)
+
+> **Note:** `raw/` only accepts `.md` files. All other formats (PDF, DOCX, PPTX, XLSX, ZIP, MP4, etc.) are silently skipped. Convert documents to `.md` first if they need to be ingested.
 
 | Feature | Original | Ours |
 |---------|----------|------|

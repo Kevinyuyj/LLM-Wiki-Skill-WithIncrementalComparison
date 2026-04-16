@@ -1,7 +1,7 @@
 ---
 name: knowledge-ingest
 description: Incremental knowledge base ingest workflow — SHA256 content-hash based, only processes new/changed files
-version: 2.2.0
+version: 2.3.0
 author: Kevinyuyj
 license: MIT
 github: https://github.com/Kevinyuyj/LLM-Wiki-Skill-WithIncrementalComparison
@@ -75,6 +75,31 @@ ingest 完成后自动执行：
 - index.md 更新（新增页面加入目录，总页数 +1）
 - log.md 追加（记录本次处理了哪些文件）
 - manifest 更新（新增/变化条目写入，删除条目移除）
+
+### 5. Manifest 管理脚本
+
+`scripts/manifest.py` 是增量系统的 CLI 工具，固化了对 `.ingest_manifest.json` 的所有操作：
+
+```bash
+# 查看 manifest 状态（条目数、磁盘覆盖情况）
+python3 scripts/manifest.py --status
+
+# 扫描并报告增量（不修改 manifest）
+python3 scripts/manifest.py --scan
+
+# 更新 manifest（将当前磁盘状态写入 manifest）
+python3 scripts/manifest.py --update
+
+# 查看单个文件的 hash 对比
+python3 scripts/manifest.py --diff "openclaw"
+```
+
+**推荐工作流：**
+1. 每次 ingest 前：`--scan` 确认有哪些新/变化文件
+2. ingest 完成后：`--update` 同步 manifest 状态
+3. 调试时：`--diff <filename>` 查看特定文件是否有变化
+
+**注意：** 脚本使用 hermes-agent 的 venv Python（`~/.hermes/hermes-agent/venv/bin/python`）读取 `~/.hermes/config.yaml` 中的 `skills.config.wiki.path`，无硬编码路径。
 
 ---
 
@@ -281,6 +306,7 @@ ingest 完成后确认：
 
 | 版本 | 日期 | 改动 |
 |------|------|------|
+| 2.3.0 | 2026-04-17 | 增量 manifest 系统代码化为 `scripts/manifest.py`，支持 `--scan`/`--update`/`--status`/`--diff`；扫描路径修正：支持 raw/ 根目录单文件和 copilot-conversations/ 目录；无硬编码路径，从 config.yaml 读取 |
 | 2.2.0 | 2026-04-13 | raw/ 只接受 .md 文件，其他格式全部跳过 |
 | 2.1.0 | 2026-04-13 | 增量 manifest 系统、copilot 对话处理流程、自动化 wiki 收尾 |
 | 2.0.0 | 2026-04-13 | 重大修正：统一 LLM-WIKI 目录结构（entities/concepts/comparisons/queries） |

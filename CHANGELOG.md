@@ -13,6 +13,13 @@ All notable changes to this skill are documented here.
   - Scans all wiki pages, resolves wikilinks, outputs `knowledge-graph.canvas`
   - Nodes auto-arranged in grid by page type, then alphabetically
   - Manual trigger only — not part of ingest
+- **Manifest CLI (`scripts/manifest.py`)** — Incremental ingest engine codeified as a runnable script
+  - `--scan`: report new/changed/deleted files vs manifest
+  - `--update`: write current disk state to manifest
+  - `--status`: show manifest summary and disk coverage
+  - `--diff <filename>`: show hash diff for a specific file
+  - Reads wiki path from `~/.hermes/config.yaml` via hermes-agent venv Python
+  - Fixed scan paths: includes `raw/` root-level files and `copilot-conversations/`
 
 ### Changed
 

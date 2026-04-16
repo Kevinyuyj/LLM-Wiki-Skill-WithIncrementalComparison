@@ -2,6 +2,26 @@
 
 All notable changes to this skill are documented here.
 
+## [2.3.0] — 2026-04-17
+
+### Added
+
+- **Canvas Export** — `skills/research/llm-wiki/` gains knowledge graph visualization via `knowledge-graph.canvas` (Obsidian native JSON format)
+  - Trigger: "generate canvas", "update canvas", "build knowledge graph"
+  - Python script at `scripts/generate_canvas.py`
+  - Reads wiki path from `~/.hermes/config.yaml` (no hardcoded paths)
+  - Scans all wiki pages, resolves wikilinks, outputs `knowledge-graph.canvas`
+  - Nodes auto-arranged in grid by page type, then alphabetically
+  - Manual trigger only — not part of ingest
+
+### Changed
+
+- **Repository restructure** — Combined into monorepo with two skills:
+  - `skills/research/llm-wiki/` — Core wiki skill (ingest, query, lint, canvas)
+  - `skills/note-taking/knowledge-ingest/` — Incremental ingest enhancement
+- **Lint: ⑨ Unexpected connections** — New check added: scan all page pairs, flag pairs where both pages share >=1 tag AND neither has a wikilink to the other. Group by shared tag. Report only, never auto-modify.
+- **README** — Rewritten to cover full monorepo: both skills, 12-point lint, canvas export
+
 ## [2.2.0] — 2026-04-13
 
 ### Changed

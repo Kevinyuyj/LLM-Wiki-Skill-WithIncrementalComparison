@@ -273,6 +273,7 @@ ingest 完成后确认：
 ❌ 在 raw/ 之外创建 knowledge/notes/diary 等未定义目录
 ❌ `.DS_Store` 纳入 manifest（必须过滤）
 ❌ manifest key 使用绝对路径（应使用相对路径）
+❌ 脚本中硬编码 wiki 路径（如 `WIKI_PATH_DEFAULT = "/Users/kevin/..."`），上传 git 会暴露本机路径。应从 `~/.hermes/config.yaml` 的 `skills.config.wiki.path` 读取；系统 Python 无 PyYAML 时，可调用 hermes-agent 的 venv Python（`~/.hermes/hermes-agent/venv/bin/python`）解析 YAML
 
 ---
 

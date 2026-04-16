@@ -1,33 +1,19 @@
-# LLM-WIKI Ingest Skill — Incremental Version
+# LLM-WIKI — Incremental Knowledge Base
 
-> Hash-based incremental ingest for personal knowledge bases. Only processes new and modified files — skips everything else.
+> Hash-based incremental ingest + knowledge graph visualization + auto-lint for personal wikis built on [Karpathy's LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) pattern.
 
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.2.0-blue.svg)](SKILL.md)
+[![Version](https://img.shields.io/badge/Version-2.3.0-blue.svg)](skills/research/llm-wiki/SKILL.md)
 
 ---
 
 ## TL;DR — What Did We Add?
 
-This skill builds on [Karpathy's LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) with one key improvement:
+Two major upgrades over the original LLM Wiki:
 
-> **Every file is identified by its SHA256 content hash, not its path or filename.**
-> When you run `ingest`, only new or changed files are processed.
-
----
-
-## Core Problem We Solved
-
-The original LLM-WIKI approach re-reads and re-analyzes **every file** on every ingest — even files that haven't changed. This is wasteful when your knowledge base grows to dozens or hundreds of sources.
-
-**Our solution:** A manifest tracks the SHA256 hash of every file. On each ingest, we compare current hashes against the manifest:
-
-```
-manifest:  raw/article.md  → hash "abc123..."
-disk now:  raw/article.md  → hash "abc123..."  → SAME, skip
-disk now:  raw/new.md      → hash not in manifest → PROCESS
-disk now:  raw/old.md      → hash "xyz789..."  → hash changed → PROCESS
-```
+1. **Incremental Ingest** — Every file is identified by its SHA256 content hash. Only new or changed files are processed — skips everything else.
+2. **Canvas Export** — Generate an Obsidian JSON Canvas knowledge graph from the wiki with one command.
+3. **Auto-Lint** — 12 health checks keep the wiki consistent: broken links, orphan pages, stale content, contradictions, unexpected connections, and more.
 
 ---
 
@@ -35,26 +21,27 @@ disk now:  raw/old.md      → hash "xyz789..."  → hash changed → PROCESS
 
 ```
 wiki/
-├── .ingest_manifest.json   # Hash manifest — THE key innovation
+├── .ingest_manifest.json   # Hash manifest — incremental processing state
+├── knowledge-graph.canvas   # Obsidian Canvas visualization (generated on demand)
 ├── raw/                    # Immutable source material
-│   ├── articles/
-│   ├── workingdocs/
-│   └── diarys/
+│   ├── articles/           # Web articles, clippings
+│   ├── workingdocs/        # Working documents
+│   └── diarys/             # Personal notes, diaries
 ├── entities/               # People, orgs, products, models
 ├── concepts/               # Topics and concepts
 ├── comparisons/            # Side-by-side analyses
 ├── queries/                # Filed Q&A worth preserving
 ├── SCHEMA.md               # Domain rules & tag taxonomy
 ├── index.md                # Content catalog
-└── log.md                 # Operation log
+└── log.md                  # Operation log
 ```
 
-### The Manifest
+### The Manifest (Incremental Core)
 
 ```json
 {
   "raw/articles/article.md": {
-    "content_hash": "a3f5c8...",   // SHA256 of file content
+    "content_hash": "a3f5c8...",
     "mtime": 1744531200,
     "size": 12345,
     "processed_at": "2026-04-13T10:00:00Z"
@@ -62,103 +49,67 @@ wiki/
 }
 ```
 
-The manifest is the single source of truth for incremental state.
+---
+
+## Skills
+
+This repository contains two complementary skills:
+
+### `skills/research/llm-wiki/` — Core Wiki Skill
+
+The main LLM Wiki skill. Handles:
+- **Ingest** — Integrate sources into the wiki with incremental hash comparison
+- **Query** — Answer questions from the compiled knowledge base
+- **Lint** — 12 automated health checks (see below)
+- **Canvas Export** — Generate `knowledge-graph.canvas` on demand
+
+### `skills/note-taking/knowledge-ingest/` — Ingest Enhancement
+
+Extends the wiki with:
+- **Incremental processing** — SHA256 hash compare, skip unchanged files
+- **Manifest tracking** — `.ingest_manifest.json` persists state across sessions
+- **copilot-conversations/ pipeline** — Archive valuable Q&A to `queries/`
 
 ---
 
-## How It Works
+## 12-Point Lint Check
 
-### The 3-Way File Check (Step 3 of ingest)
+Every check is **read-only** — never auto-modifies content.
 
-| Disk | Manifest | Action |
-|------|----------|--------|
-| File exists | Hash differs | **Re-process** — content changed |
-| File exists | Not in manifest | **New file** — process |
-| File exists | Hash same | **Skip** — nothing to do |
-| Not on disk | Exists in manifest | **Remove** from manifest |
-
-### Key Insight: Hash > Path
-
-If you move `raw/article.md` to `raw/diarys/article.md`, the hash is identical — we detect this and skip processing. No duplicate entries, no wasted LLM calls.
+| # | Check | Severity |
+|---|-------|----------|
+| ① | Orphan pages — no inbound wikilinks | High |
+| ② | Broken wikilinks — target doesn't exist | High |
+| ③ | Index completeness — missing from `index.md` | Medium |
+| ④ | Frontmatter validation — required fields, valid tags | Medium |
+| ⑤ | Stale content — >90 days without update | Low |
+| ⑥ | Contradictions — conflicting claims on same topic | High |
+| ⑦ | Page size — over 200 lines (candidate for split) | Low |
+| ⑧ | Tag audit — tags not in taxonomy | Medium |
+| ⑨ | Unexpected connections — shared tags but no reciprocal link | Low |
+| ⑩ | Log rotation — rotate if >500 entries | Low |
+| ⑪ | Report findings — grouped by severity | — |
+| ⑫ | Append to `log.md` | — |
 
 ---
 
 ## Usage
 
+```bash
+# Ingest new sources (incremental — only new/changed files)
+ingest
+
+# Query the wiki
+ask "what do we know about X?"
+
+# Health check the wiki
+lint
+
+# Generate knowledge graph canvas
+generate canvas
 ```
-You: "ingest"
 
-→ Agent scans raw/ and copilot-conversations/
-→ Computes SHA256 for each file
-→ Compares against .ingest_manifest.json
-→ Processes only new or changed files
-→ Updates entities/concepts/queries pages
-→ Auto-updates index.md, log.md, manifest
-→ Reports results
-```
-
-No configuration needed. Just say "ingest".
-
----
-
-## What We Added (vs Original LLM-WIKI)
-
-> **Note:** `raw/` only accepts `.md` files. All other formats (PDF, DOCX, PPTX, XLSX, ZIP, MP4, etc.) are silently skipped. Convert documents to `.md` first if they need to be ingested.
-
-| Feature | Original | Ours |
-|---------|----------|------|
-| Incremental processing | ❌ Re-processes everything | ✅ SHA256 hash compare |
-| Manifest state | ❌ None | ✅ `.ingest_manifest.json` |
-| Path-change handling | ❌ Creates duplicates | ✅ Hash = identity, no duplicates |
-| File deletion detection | ❌ None | ✅ Manifest cleanup |
-| copilot-conversations/ | ❌ Not defined | ✅ Full pipeline with "painful to re-derive" threshold |
-| Wiki auto-maintenance | ❌ Manual | ✅ index + log + manifest all updated |
-| .DS_Store filtering | ❌ May be processed | ✅ Explicitly filtered |
-
----
-
-## copilot Conversation Archival
-
-Not all conversations are worth keeping. We use the same standard as wiki queries:
-
-**Archive to `queries/` when the answer is "painful to re-derive"** — meaning:
-- Specific tricks or workarounds discovered through experimentation
-- Complex reasoning chains you'd have to rebuild from scratch
-- Tool-specific insights not easily found elsewhere
-
-**Skip when:**
-- Pure formatting fixes (table alignment, Markdown syntax)
-- Content already covered in existing wiki pages
-- Simple Q&A that could be answered instantly
-
----
-
-## Auto-Maintenance
-
-After every ingest, these are updated automatically:
-
-1. **index.md** — New pages added to catalog, total count incremented
-2. **log.md** — Every operation recorded with timestamp
-3. **manifest** — New/modified entries added, deleted entries removed
-
----
-
-## Verification — Tested Three Scenarios
-
-| Scenario | Expected | Result |
-|----------|----------|--------|
-| First ingest (empty manifest) | All files processed, manifest created | ✅ |
-| Second ingest (no changes) | All skipped, zero LLM calls | ✅ |
-| Third ingest (1 new + 1 modified) | Only 2 files processed, rest skipped | ✅ |
-
----
-
-## Tech Stack
-
-- **SHA256** — Content identity via `shasum -a 256` (no external deps)
-- **Hermes Agent** — AI agent framework
-- **Obsidian** — Knowledge base frontend
-- **LLM-WIKI** — Knowledge organization pattern by Andrej Karpathy
+No configuration needed. Just speak what you want.
 
 ---
 
@@ -167,14 +118,22 @@ After every ingest, these are updated automatically:
 ```bash
 # Trigger ingest — everything else is automatic
 ingest
+
+# Trigger lint
+lint
+
+# Generate canvas
+generate canvas
 ```
 
-The skill runs autonomously:
-1. Scans raw/ and copilot-conversations/
-2. Hash-compares against manifest
-3. Processes new/changed files only
-4. Updates all wiki metadata
-5. Reports summary
+---
+
+## Tech Stack
+
+- **SHA256** — Content identity via `shasum -a 256` (no external deps)
+- **Hermes Agent** — AI agent framework
+- **Obsidian** — Knowledge base frontend + Canvas visualization
+- **LLM-WIKI** — Knowledge organization pattern by Andrej Karpathy
 
 ---
 

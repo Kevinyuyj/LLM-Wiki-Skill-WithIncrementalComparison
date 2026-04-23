@@ -177,6 +177,7 @@ def main():
     page_ids: dict[str, dict] = {}
     for i, (fp, fm, _) in enumerate(pages):
         pid = extract_page_id(fp, fm)
+        page_type = extract_page_type(fp, fm)
         page_ids[pid] = {
             "id": pid,
             "type": "file",
@@ -186,6 +187,7 @@ def main():
             "y": 0,
             "width": 400,
             "height": 200,
+            "color": TYPE_COLORS.get(page_type, "1"),
         }
 
     # Grid layout — sort by page_type then by label for consistent ordering

@@ -204,6 +204,10 @@ d) 每个页面要求：
    - frontmatter 完整（title, created, updated, type, tags, sources）
    - 至少 2 个 [[wikilinks]]
    - tags 必须在 SCHEMA.md 标签体系内
+   - **Obsidian YAML 格式规范（必须遵守，否则渲染异常或 Canvas 报错）：**
+     - `tags` 必须为 block list 格式 `tags: [tag1, tag2]` 或多行列表，禁止在 flow scalar 后紧跟 block item
+     - 禁止在任何 flow scalar（用 `""` 或 `''` 或无引号单行）后直接添加 `-` 开头的 block item
+     - Canvas 节点只允许 11 个标准属性，禁止添加 `page_type` 等自定义属性
 ```
 
 #### B. 处理 copilot-conversations/ 对话

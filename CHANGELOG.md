@@ -2,6 +2,20 @@
 
 All notable changes to this skill are documented here.
 
+## [2.3.1] — 2026-04-23
+
+### Fixed
+
+- **Canvas `page_type` invalid attribute**: `generate_canvas.py` removed `page_type` from canvas node objects — Obsidian Canvas only allows 11 standard attributes (id, type, file, x, y, width, height, color, background, stroke, fontSize). Custom attributes cause "invalid attribute" red warning.
+- **YAML flow scalar + block item rule**: Both `skills/research/llm-wiki/SKILL.md` (SCHEMA template) and `skills/note-taking/knowledge-ingest/SKILL.md` (ingest steps) now explicitly forbid placing a block item (`- tag`) immediately after a flow scalar YAML value — this causes YAML parsing ambiguity and rendering anomalies.
+- **tags block list format**: SCHEMA template now uses block list `tags:\n  - tag1\n  - tag2` instead of inline `tags: [tag1, tag2]` to eliminate the ambiguity entirely.
+
+### Context
+
+On 2026-04-23, Kevin performed a full vault audit and fixed all notes with YAML/Canvas format violations. This patch syncs the skill templates to prevent future regressions.
+
+---
+
 ## [2.3.0] — 2026-04-17
 
 ### Added

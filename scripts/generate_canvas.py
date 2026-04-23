@@ -182,7 +182,6 @@ def main():
             "type": "file",
             "file": str(fp.relative_to(wiki_path)),
             "label": extract_page_label(fp, fm),
-            "page_type": extract_page_type(fp, fm),
             "x": 0,
             "y": 0,
             "width": 400,

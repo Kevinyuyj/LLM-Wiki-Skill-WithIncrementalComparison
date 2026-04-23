@@ -140,9 +140,20 @@ Adapt to the user's domain. The schema constrains agent behavior and ensures con
   created: YYYY-MM-DD
   updated: YYYY-MM-DD
   type: entity | concept | comparison | query | summary
-  tags: [from taxonomy below]
+  tags:
+    - tag1
+    - tag2
   sources: [raw/articles/source-name.md]
   ---
+
+  **Obsidian YAML 格式规范（必须遵守，否则渲染异常或 Canvas 报错）：**
+  - `tags` 只允许 block list 格式（多行 `-` 列表），禁止 flow scalar 格式 `tags: [tag1, tag2]`
+  - 禁止在任何 flow scalar（用 `""`/`''`/无引号单行）后紧跟 `-` 开头的 block item
+    - ❌ 正确：`tags: [llm, openai]` 后跟 `description: "xxx"\n- xxx`（不报错但危险）
+    - ❌ 错误：`tags: [llm]` 后面直接跟 `- another-tag`（YAML 多行解析异常）
+    - ✅ 正确：统一用 block list `tags:\n  - llm\n  - openai`
+  - Canvas 节点只允许 11 个标准属性（id, type, file, x, y, width, height, color, background, stroke, fontSize），禁止添加 `page_type` 等自定义属性
+
   ```
 
 ## Tag Taxonomy
